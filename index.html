@@ -212,12 +212,16 @@
       }
       .bwrap {
         position: relative;
+        display: inline-block;
+        margin: 0 auto;
         background: #fff;
         border: 3px solid var(--bd);
         border-radius: 16px;
         padding: 10px;
         box-shadow: 0 4px 24px var(--sh);
         overflow: visible;
+        transform-origin: top left;
+        will-change: transform;
       }
       .board {
         display: grid;
@@ -319,7 +323,9 @@
         padding: 4px;
         display: block;
         pointer-events: none;
-        image-rendering: pixelated;
+        image-rendering: optimizeQuality;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
       }
       .tile .fb {
         width: 100%;
@@ -654,6 +660,7 @@
         { R: 8, C: 8, T: 16, sec: 240, name: "Màn 2" }, // 4 phút
         { R: 8, C: 10, T: 20, sec: 300, name: "Màn 3" }, // 5 phút
       ];
+      const LV_COUNT = LVS.length;
 
       // ── State ──
       let G = [],
@@ -725,6 +732,7 @@
           try {
             localStorage.setItem("pika3_hs", String(hs));
           } catch (e) {}
+          document.getElementById("mainHs").textContent = hs;
           return true;
         }
         return false;
@@ -955,15 +963,21 @@
       function updHdr() {
         document.getElementById("ptsD").textContent = pts;
         document.getElementById("tmrD").textContent = tl;
-        document.getElementById("lvD").textContent = curLv + 1 + "/3";
+        document.getElementById("lvD").textContent = curLv + 1 + "/" + LV_COUNT;
         document.getElementById("tmrStat").classList.toggle("hot", tl <= 30);
-        // dots
-        for (let i = 0; i < 3; i++) {
-          const d = document.getElementById("d" + i);
-          if (!d) continue;
-          d.classList.remove("done", "cur");
-          if (i < curLv) d.classList.add("done");
-          else if (i === curLv) d.classList.add("cur");
+        const dots = document.querySelectorAll("#lvProg .lv-dot");
+        dots.forEach((d, i) => {
+          d.classList.toggle("done", i < curLv);
+          d.classList.toggle("cur", i === curLv);
+        });
+      }
+      function renderLevelDots() {
+        const prog = document.getElementById("lvProg");
+        prog.innerHTML = "";
+        for (let i = 0; i < LV_COUNT; i++) {
+          const dot = document.createElement("div");
+          dot.className = "lv-dot";
+          prog.appendChild(dot);
         }
       }
 
@@ -1069,18 +1083,33 @@
               vs.push(G[r][c]);
             }
         if (!ps.length) return;
+
         let tries = 0;
+        let hasMove = false;
         do {
           shuf(vs);
           ps.forEach((p, i) => {
             G[p.r][p.c] = vs[i];
           });
+          hasMove = anyMove();
           tries++;
-        } while (!anyMove() && tries < 100);
+        } while (!hasMove && tries < 100);
+
+        if (!hasMove) {
+          let rebuild = 0;
+          do {
+            mkGrid(curLv);
+            rebuild++;
+            hasMove = anyMove();
+          } while (!hasMove && rebuild < 20);
+        }
+
         clrHint();
         desel();
         clrPath();
-        document.getElementById("dlkBanner").style.display = "none";
+        document.getElementById("dlkBanner").style.display = hasMove
+          ? "none"
+          : "block";
         sShuffle();
         for (let r = 1; r <= R; r++)
           for (let c = 1; c <= C; c++) {
@@ -1126,18 +1155,18 @@
         pts += bonus;
         updHdr();
         sLvlDone();
-        const isLast = curLv === 2;
+        const isLast = curLv === LV_COUNT - 1;
         if (isLast) {
-          // All 3 levels done!
+          // All levels done!
           setTimeout(() => doAllWin(), 600);
         } else {
           document.getElementById("lvOvTitle").textContent =
-            curLv === 0 ? "🎉 Màn 1 xong!" : "🎊 Màn 2 xong!";
+            LVS[curLv].name + " xong!";
           document.getElementById("lvOvPts").textContent = pts;
           document.getElementById("lvOvBonus").textContent =
             `+${bonus} điểm thưởng thời gian`;
           document.getElementById("lvOvBtn").textContent =
-            "Màn " + (curLv + 2) + " →";
+            LVS[curLv + 1].name + " →";
           document.getElementById("lvOv").classList.add("on");
         }
       }
@@ -1215,13 +1244,15 @@
         const avail = window.innerWidth - 32;
         const nat = C * (TS + TG) - TG + 22;
         const sc = Math.min(1, avail / nat);
-        w.style.zoom = String(sc);
+        w.style.zoom = "";
+        w.style.transform = sc < 1 ? `scale(${sc})` : "";
       }
       window.addEventListener("resize", () => {
         if (G.length) scaleBoard();
       });
 
       // ── Init ──
+      renderLevelDots();
       loadHS();
     </script>
   </body>
