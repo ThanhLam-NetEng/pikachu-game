@@ -190,6 +190,8 @@
         padding: 10px 14px;
         gap: 10px;
         min-height: 100vh;
+        min-height: 100dvh;
+        overflow: hidden;
       }
       .hdr {
         display: flex;
@@ -506,8 +508,8 @@
       @media (max-width: 760px) {
         .start-btn,
         .btn {
-          font-size: 18px;
-          padding: 14px 20px;
+          font-size: 14px;
+          padding: 10px 14px;
         }
         .howto {
           padding: 16px 18px;
@@ -517,12 +519,19 @@
         }
         .stat {
           min-width: 72px;
+          padding: 6px 10px;
+        }
+        .s-val {
+          font-size: 24px;
+        }
+        .stat.tmr .s-val {
+          font-size: 12px;
         }
         .bwrap {
-          padding: 8px;
+          padding: 6px;
           border-width: 2px;
           max-width: calc(100vw - 16px);
-          max-height: calc(100vh - 150px);
+          max-height: calc(100dvh - 132px);
         }
         .timer-hint {
           font-size: 13px;
@@ -531,6 +540,71 @@
       }
 
       /* ── OVERLAYS ── */
+      @media (max-height: 520px) and (orientation: landscape) {
+        #game {
+          padding: 6px 8px;
+          gap: 5px;
+          justify-content: flex-start;
+        }
+        .hdr {
+          gap: 5px;
+        }
+        .stat {
+          min-width: 62px;
+          padding: 4px 8px;
+          border-width: 1px;
+          border-radius: 10px;
+        }
+        .s-lbl {
+          font-size: 9px;
+          letter-spacing: 0;
+        }
+        .s-val {
+          font-size: 20px;
+        }
+        .stat.tmr {
+          min-width: 112px;
+        }
+        .stat.tmr .s-val {
+          font-size: 11px;
+        }
+        .stat.tmr .timer-bar {
+          height: 5px;
+          margin-top: 4px;
+        }
+        .lv-prog {
+          gap: 4px;
+        }
+        .lv-dot {
+          width: 9px;
+          height: 9px;
+          border-width: 1px;
+        }
+        #dlkBanner {
+          padding: 4px 10px;
+          font-size: 12px;
+          border-width: 1px;
+        }
+        .bwrap {
+          padding: 6px;
+          border-width: 2px;
+          border-radius: 12px;
+          max-width: calc(100vw - 16px);
+          max-height: calc(100dvh - 92px);
+        }
+        .ctrl {
+          gap: 5px;
+        }
+        .btn {
+          font-size: 12px;
+          padding: 6px 10px;
+          border-radius: 20px;
+        }
+        .timer-hint {
+          display: none !important;
+        }
+      }
+
       .ov {
         position: fixed;
         inset: 0;
@@ -679,9 +753,6 @@
         <button class="btn b-gy" onclick="doShuffle()">🔀 Xáo bài</button>
         <button class="btn b-gr" id="soundBtn" onclick="toggleSound()">
           🔊 Âm thanh: Bật
-        </button>
-        <button class="btn b-gy" id="themeBtn" onclick="toggleTheme()">
-          🌙 Ban đêm
         </button>
         <button class="btn b-gy" id="themeBtn" onclick="toggleTheme()">
           🌙 Ban đêm
@@ -1161,19 +1232,44 @@
         };
         el.appendChild(img);
       }
+      function isTightLandscape() {
+        const vw = window.visualViewport
+          ? window.visualViewport.width
+          : window.innerWidth;
+        const vh = window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight;
+        return vw > vh && vh <= 520;
+      }
+      function layoutReserve() {
+        if (isTightLandscape()) return 18;
+        return window.matchMedia("(max-width: 760px)").matches ? 72 : 112;
+      }
+      function boardChrome() {
+        return window.matchMedia("(max-width: 760px)").matches ||
+          isTightLandscape()
+          ? 16
+          : 26;
+      }
       function adjustTileSize() {
         if (!R || !C) return false;
-        const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
-        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        const vw = window.visualViewport
+          ? window.visualViewport.width
+          : window.innerWidth;
+        const vh = window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight;
         const usedH =
           (E.hdr?.getBoundingClientRect().height || 0) +
           (E.ctrl?.getBoundingClientRect().height || 0) +
-          112;
+          layoutReserve();
+        const chrome = boardChrome();
         const availW = Math.max(0, vw - 24);
         const availH = Math.max(0, vh - usedH);
-        const maxWidthTs = Math.floor((availW - 22 + TG) / C - TG);
-        const maxHeightTs = Math.floor((availH - 22 + TG) / R - TG);
-        const nextTS = Math.max(40, Math.min(72, maxWidthTs, maxHeightTs));
+        const maxWidthTs = Math.floor((availW - chrome + TG) / C - TG);
+        const maxHeightTs = Math.floor((availH - chrome + TG) / R - TG);
+        const minTs = isTightLandscape() ? 28 : 40;
+        const nextTS = Math.max(minTs, Math.min(72, maxWidthTs, maxHeightTs));
         if (nextTS !== TS) {
           TS = nextTS;
           return true;
@@ -1502,8 +1598,9 @@
       function scaleBoard() {
         const w = E.bwrap;
         if (!w || !C || !E.hdr || !E.ctrl) return;
-        const natW = C * (TS + TG) - TG + 22;
-        const natH = R * (TS + TG) - TG + 22;
+        const chrome = boardChrome();
+        const natW = C * (TS + TG) - TG + chrome;
+        const natH = R * (TS + TG) - TG + chrome;
         const viewportW = window.visualViewport
           ? window.visualViewport.width
           : window.innerWidth;
@@ -1513,7 +1610,7 @@
         const usedH =
           E.hdr.getBoundingClientRect().height +
           E.ctrl.getBoundingClientRect().height +
-          112;
+          layoutReserve();
         const availW = Math.max(1, viewportW - 24);
         const availH = Math.max(1, viewportH - usedH);
         const sc = Math.min(1, availW / natW, availH / natH);
