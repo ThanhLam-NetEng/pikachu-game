@@ -1,0 +1,1228 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⚡ Pikachu Game ⚡</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --or: #ff8c00;
+        --ye: #ffd700;
+        --bg: #fffbea;
+        --tx: #3d2c00;
+        --bd: #e8c94a;
+        --sh: rgba(255, 160, 0, 0.2);
+        --bl: #3498db;
+        --gr: #27ae60;
+        --rd: #e74c3c;
+      }
+      body {
+        background: var(--bg);
+        background-image: radial-gradient(
+          ellipse 80% 50% at 50% 0%,
+          rgba(255, 215, 0, 0.18),
+          transparent
+        );
+        font-family: "Nunito", sans-serif;
+        min-height: 100vh;
+        color: var(--tx);
+      }
+      .scr {
+        display: none;
+      }
+      .scr.on {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* ── START ── */
+      #start {
+        gap: 28px;
+        padding: 40px 20px;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+      }
+      .logo-icon {
+        font-size: 80px;
+        animation: float 2.8s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-14px);
+        }
+      }
+      .logo-t {
+        font-family: "Fredoka One", cursive;
+        font-size: clamp(56px, 14vw, 92px);
+        color: var(--or);
+        text-shadow:
+          3px 3px 0 var(--ye),
+          5px 5px 0 rgba(255, 140, 0, 0.15);
+        line-height: 1;
+      }
+      .logo-s {
+        font-size: 18px;
+        color: #8b6914;
+        margin-top: 4px;
+      }
+      .hs-box {
+        background: #fff;
+        border: 2px solid var(--bd);
+        border-radius: 16px;
+        padding: 14px 30px;
+        box-shadow: 0 2px 12px var(--sh);
+      }
+      .hs-box p {
+        font-size: 14px;
+        color: #a08020;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .hs-box .n {
+        font-family: "Fredoka One", cursive;
+        font-size: 42px;
+        color: var(--or);
+      }
+      .start-btn {
+        font-family: "Fredoka One", cursive;
+        font-size: 30px;
+        padding: 18px 56px;
+        background: var(--or);
+        color: #fff;
+        border: none;
+        border-radius: 60px;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+        letter-spacing: 1px;
+      }
+      .start-btn:hover {
+        transform: translateY(-4px) scale(1.04);
+        box-shadow: 0 10px 28px rgba(255, 140, 0, 0.5);
+      }
+      .start-btn:active {
+        transform: translateY(0);
+      }
+      .howto {
+        background: #fff;
+        border: 2px solid var(--bd);
+        border-radius: 16px;
+        padding: 18px 26px;
+        max-width: 460px;
+        width: 100%;
+        box-shadow: 0 2px 12px var(--sh);
+      }
+      .howto h3 {
+        font-family: "Fredoka One", cursive;
+        font-size: 22px;
+        color: var(--or);
+        margin-bottom: 10px;
+      }
+      .howto p {
+        font-size: 15px;
+        line-height: 1.85;
+        color: #5c4400;
+      }
+
+      /* ── GAME ── */
+      #game {
+        padding: 10px 14px;
+        gap: 10px;
+        min-height: 100vh;
+      }
+      .hdr {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+      }
+      .stat {
+        background: #fff;
+        border: 2px solid var(--bd);
+        border-radius: 14px;
+        padding: 7px 16px;
+        text-align: center;
+        box-shadow: 0 2px 10px var(--sh);
+        min-width: 88px;
+      }
+      .s-lbl {
+        font-size: 11px;
+        font-weight: 800;
+        color: #a08020;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .s-val {
+        font-family: "Fredoka One", cursive;
+        font-size: 28px;
+        color: var(--tx);
+        line-height: 1.1;
+      }
+      .stat.tmr .s-val {
+        color: var(--or);
+      }
+      .stat.tmr.hot {
+        background: #fff0f0;
+        border-color: var(--rd);
+      }
+      .stat.tmr.hot .s-val {
+        color: var(--rd);
+        animation: throb 0.55s ease-in-out infinite;
+      }
+      @keyframes throb {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+      }
+      #dlkBanner {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 12px;
+        padding: 9px 18px;
+        font-size: 15px;
+        color: #856404;
+        text-align: center;
+        display: none;
+        max-width: 720px;
+        width: 100%;
+        font-weight: 700;
+      }
+      .bwrap {
+        position: relative;
+        background: #fff;
+        border: 3px solid var(--bd);
+        border-radius: 16px;
+        padding: 10px;
+        box-shadow: 0 4px 24px var(--sh);
+        overflow: visible;
+      }
+      .board {
+        display: grid;
+        gap: 4px;
+      }
+      .tile {
+        width: 72px;
+        height: 72px;
+        border-radius: 11px;
+        cursor: pointer;
+        background: #fffef5;
+        border: 3px solid var(--bd);
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s,
+          border-color 0.1s;
+        overflow: hidden;
+        position: relative;
+        user-select: none;
+      }
+      .tile:hover:not(.empty) {
+        transform: scale(1.07);
+        box-shadow: 0 4px 14px rgba(255, 140, 0, 0.4);
+        border-color: #ffc107;
+      }
+      .tile.sel {
+        border-color: var(--or) !important;
+        box-shadow:
+          0 0 0 4px rgba(255, 140, 0, 0.28),
+          0 4px 18px rgba(255, 140, 0, 0.45) !important;
+        transform: scale(1.1) !important;
+        background: #fff8e7 !important;
+      }
+      .tile.hint {
+        border-color: var(--bl) !important;
+        box-shadow:
+          0 0 0 4px rgba(52, 152, 219, 0.28),
+          0 4px 16px rgba(52, 152, 219, 0.4) !important;
+        animation: hpulse 0.65s ease-in-out infinite !important;
+      }
+      @keyframes hpulse {
+        0%,
+        100% {
+          transform: scale(1.06);
+        }
+        50% {
+          transform: scale(1.14);
+        }
+      }
+      .tile.wrong {
+        animation: shk 0.42s ease-in-out;
+      }
+      @keyframes shk {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        18% {
+          transform: translateX(-7px);
+        }
+        38% {
+          transform: translateX(7px);
+        }
+        56% {
+          transform: translateX(-5px);
+        }
+        76% {
+          transform: translateX(5px);
+        }
+      }
+      .tile.boom {
+        animation: pop 0.38s ease-out forwards;
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        55% {
+          transform: scale(1.32);
+          opacity: 0.7;
+        }
+        100% {
+          transform: scale(0);
+          opacity: 0;
+        }
+      }
+      .tile.empty {
+        visibility: hidden;
+        pointer-events: none;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+      .tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 4px;
+        display: block;
+        pointer-events: none;
+        image-rendering: pixelated;
+      }
+      .tile .fb {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+      }
+      #pcanvas {
+        position: absolute;
+        pointer-events: none;
+        z-index: 10;
+      }
+      .ctrl {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .btn {
+        font-family: "Nunito", sans-serif;
+        font-weight: 800;
+        font-size: 16px;
+        padding: 11px 22px;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .b-or {
+        background: var(--or);
+        color: #fff;
+      }
+      .b-bl {
+        background: var(--bl);
+        color: #fff;
+      }
+      .b-gy {
+        background: #fff;
+        color: var(--tx);
+        border: 2px solid var(--bd);
+      }
+      .b-rd {
+        background: var(--rd);
+        color: #fff;
+      }
+      .b-gr {
+        background: var(--gr);
+        color: #fff;
+      }
+
+      /* level progress bar */
+      .lv-prog {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .lv-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #e8d5a0;
+        border: 2px solid var(--bd);
+        transition: all 0.3s;
+      }
+      .lv-dot.done {
+        background: var(--gr);
+        border-color: var(--gr);
+      }
+      .lv-dot.cur {
+        background: var(--or);
+        border-color: var(--or);
+        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.25);
+      }
+
+      /* ── OVERLAYS ── */
+      .ov {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 300;
+      }
+      .ov.on {
+        display: flex;
+        animation: ovin 0.25s ease;
+      }
+      @keyframes ovin {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .popup {
+        background: #fff;
+        border-radius: 24px;
+        padding: 36px 32px;
+        text-align: center;
+        max-width: 380px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border: 4px solid var(--bd);
+        animation: popin 0.3s ease;
+      }
+      @keyframes popin {
+        from {
+          transform: translateY(22px);
+          opacity: 0;
+        }
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+      .popup h2 {
+        font-family: "Fredoka One", cursive;
+        font-size: 40px;
+        margin-bottom: 6px;
+      }
+      .popup .pts {
+        font-family: "Fredoka One", cursive;
+        font-size: 58px;
+        color: var(--or);
+        line-height: 1;
+        margin: 6px 0;
+      }
+      .popup p {
+        font-size: 16px;
+        color: #5c4400;
+      }
+      .popup .sub {
+        font-size: 14px;
+        color: #8b6914;
+        margin-top: 4px;
+      }
+      .popup .btns {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 22px;
+        flex-wrap: wrap;
+      }
+      .rec {
+        color: var(--or) !important;
+        font-size: 18px !important;
+        font-weight: 900 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══ START ═══ -->
+    <div id="start" class="scr on">
+      <div>
+        <div class="logo-icon">⚡</div>
+        <div class="logo-t">PIKACHU</div>
+        <div class="logo-s">🎮 Game nối hình vui vẻ 🎮</div>
+      </div>
+      <div class="hs-box">
+        <p>🏆 Kỷ lục cao nhất</p>
+        <div class="n" id="mainHs">0</div>
+      </div>
+      <button class="start-btn" onclick="startRun()">Bắt đầu!</button>
+      <div class="howto">
+        <h3>📖 Cách chơi</h3>
+        <p>
+          👆 <b>Click 2 ô có cùng hình Pokémon</b> để nối<br />
+          🔗 Đường nối <b>không quá 2 lần rẽ góc</b><br />
+          🏅 3 màn tăng dần — nối hết là qua màn<br />
+          💡 <b>Gợi ý</b> (trừ 20đ) • 🔀 <b>Xáo bài</b> khi bí
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══ GAME ═══ -->
+    <div id="game" class="scr">
+      <div class="hdr">
+        <div class="stat">
+          <div class="s-lbl">Màn</div>
+          <div class="s-val" id="lvD">1/3</div>
+        </div>
+        <div class="stat tmr" id="tmrStat">
+          <div class="s-lbl">⏱ Giờ còn</div>
+          <div class="s-val" id="tmrD">180</div>
+        </div>
+        <div class="stat">
+          <div class="s-lbl">Điểm</div>
+          <div class="s-val" id="ptsD">0</div>
+        </div>
+        <div class="stat">
+          <div class="s-lbl">Tiến độ</div>
+          <div class="lv-prog" id="lvProg">
+            <div class="lv-dot cur" id="d0"></div>
+            <div class="lv-dot" id="d1"></div>
+            <div class="lv-dot" id="d2"></div>
+          </div>
+        </div>
+      </div>
+      <div id="dlkBanner">
+        ⚠️ Không còn nước đi! Nhấn 🔀 Xáo bài để tiếp tục.
+      </div>
+      <div class="bwrap" id="bwrap">
+        <div class="board" id="board"></div>
+        <canvas id="pcanvas"></canvas>
+      </div>
+      <div class="ctrl">
+        <button class="btn b-bl" onclick="doHint()">💡 Gợi ý</button>
+        <button class="btn b-gy" onclick="doShuffle()">🔀 Xáo bài</button>
+        <button class="btn b-rd" onclick="confirmQuit()">🏠 Thoát</button>
+      </div>
+    </div>
+
+    <!-- ─ LEVEL COMPLETE (between levels) ─ -->
+    <div class="ov" id="lvOv">
+      <div class="popup">
+        <h2 id="lvOvTitle">🎉</h2>
+        <p>Điểm tích lũy:</p>
+        <div class="pts" id="lvOvPts">0</div>
+        <p id="lvOvBonus" class="sub"></p>
+        <div class="btns">
+          <button class="btn b-or" id="lvOvBtn" onclick="nextLevel()">
+            Màn tiếp →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ GAME COMPLETE (all 3 done) ─ -->
+    <div class="ov" id="winOv">
+      <div class="popup">
+        <h2>🏆 Quá giỏi!</h2>
+        <p>Tổng điểm 3 màn:</p>
+        <div class="pts" id="winPts">0</div>
+        <p id="winMsg"></p>
+        <div class="btns">
+          <button class="btn b-or" onclick="startRun()">🔄 Chơi lại</button>
+          <button class="btn b-gr" onclick="goStart()">🏠 Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ GAME OVER ─ -->
+    <div class="ov" id="loseOv">
+      <div class="popup">
+        <h2>⏰ Hết giờ!</h2>
+        <p>Điểm lần này:</p>
+        <div class="pts" id="losePts">0</div>
+        <p id="loseMsg"></p>
+        <div class="btns">
+          <button class="btn b-or" onclick="startRun()">🔄 Chơi lại</button>
+          <button class="btn b-gy" onclick="goStart()">🏠 Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ══════════════════════════════════════════
+   PIKACHU GAME — Sequential Levels Edition
+══════════════════════════════════════════ */
+
+      const TS = 72,
+        TG = 4,
+        CP = TS + TG;
+
+      // 20 Pokémon — regular sprites (96×96, loads fast & reliably)
+      const PKMS = [
+        { id: 25, n: "Pikachu" },
+        { id: 39, n: "Jigglypuff" },
+        { id: 52, n: "Meowth" },
+        { id: 133, n: "Eevee" },
+        { id: 143, n: "Snorlax" },
+        { id: 54, n: "Psyduck" },
+        { id: 79, n: "Slowpoke" },
+        { id: 113, n: "Chansey" },
+        { id: 35, n: "Clefairy" },
+        { id: 1, n: "Bulbasaur" },
+        { id: 4, n: "Charmander" },
+        { id: 7, n: "Squirtle" },
+        { id: 58, n: "Growlithe" },
+        { id: 129, n: "Magikarp" },
+        { id: 131, n: "Lapras" },
+        { id: 172, n: "Pichu" },
+        { id: 175, n: "Togepi" },
+        { id: 183, n: "Marill" },
+        { id: 152, n: "Chikorita" },
+        { id: 155, n: "Cyndaquil" },
+      ];
+      const EMJ = [
+        "⚡",
+        "🎵",
+        "🐱",
+        "⭐",
+        "💤",
+        "😕",
+        "😴",
+        "🥚",
+        "🌟",
+        "🌿",
+        "🔥",
+        "💧",
+        "🐕",
+        "🐟",
+        "🧊",
+        "💛",
+        "🥚",
+        "💙",
+        "🌱",
+        "🔥",
+      ];
+
+      // Sprite URL — regular sprites, smaller and more reliable
+      const spriteUrl = (id) =>
+        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+
+      // 3 sequential levels: more relaxed time
+      const LVS = [
+        { R: 6, C: 8, T: 12, sec: 180, name: "Màn 1" }, // 3 phút
+        { R: 8, C: 8, T: 16, sec: 240, name: "Màn 2" }, // 4 phút
+        { R: 8, C: 10, T: 20, sec: 300, name: "Màn 3" }, // 5 phút
+      ];
+
+      // ── State ──
+      let G = [],
+        R = 0,
+        C = 0;
+      let sel = null,
+        pts = 0,
+        tl = 0;
+      let tmrId = null,
+        curLv = 0;
+      let hs = 0;
+      let busy = false,
+        hEl = [],
+        hTO = null;
+
+      // ── Audio ──
+      let AC = null;
+      const ga = () =>
+        AC || (AC = new (window.AudioContext || window.webkitAudioContext)());
+      function tn(fr, wh, dr, vol = 0.25, tp = "sine") {
+        try {
+          const a = ga(),
+            o = a.createOscillator(),
+            g = a.createGain();
+          o.connect(g);
+          g.connect(a.destination);
+          o.type = tp;
+          o.frequency.value = fr;
+          g.gain.setValueAtTime(vol, a.currentTime + wh);
+          g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + wh + dr);
+          o.start(a.currentTime + wh);
+          o.stop(a.currentTime + wh + dr + 0.05);
+        } catch (e) {}
+      }
+      const sMatch = () => {
+        tn(523, 0, 0.1);
+        tn(659, 0.09, 0.1);
+        tn(784, 0.18, 0.18, 0.3);
+      };
+      const sMiss = () => tn(180, 0, 0.18, 0.13, "sawtooth");
+      const sLvlDone = () =>
+        [523, 659, 784, 1047, 1318].forEach((f, i) =>
+          tn(f, i * 0.12, 0.28, 0.3),
+        );
+      const sWin = () => {
+        [523, 659, 784, 1047].forEach((f, i) => tn(f, i * 0.13, 0.3, 0.32));
+        setTimeout(
+          () =>
+            [659, 784, 1047, 1318].forEach((f, i) =>
+              tn(f, i * 0.1, 0.25, 0.28),
+            ),
+          600,
+        );
+      };
+      const sShuffle = () =>
+        [220, 262, 330, 392].forEach((f, i) => tn(f, i * 0.07, 0.1, 0.12));
+      const sClick = () => tn(440, 0, 0.05, 0.07);
+
+      // ── High Score ──
+      function loadHS() {
+        try {
+          hs = parseInt(localStorage.getItem("pika3_hs") || "0") || 0;
+        } catch (e) {}
+        document.getElementById("mainHs").textContent = hs;
+      }
+      function saveHS(sc) {
+        if (sc > hs) {
+          hs = sc;
+          try {
+            localStorage.setItem("pika3_hs", String(hs));
+          } catch (e) {}
+          return true;
+        }
+        return false;
+      }
+
+      // ── Grid ──
+      function shuf(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = 0 | (Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function mkGrid(li) {
+        const l = LVS[li];
+        R = l.R;
+        C = l.C;
+        const vals = [];
+        for (let t = 1; t <= l.T; t++)
+          for (let k = 0; k < (R * C) / l.T; k++) vals.push(t);
+        shuf(vals);
+        G = [];
+        for (let r = 0; r <= R + 1; r++) {
+          G[r] = [];
+          for (let c = 0; c <= C + 1; c++)
+            G[r][c] =
+              r === 0 || r === R + 1 || c === 0 || c === C + 1
+                ? 0
+                : vals[(r - 1) * C + (c - 1)];
+        }
+      }
+
+      // ── Path Finding ──
+      function lc(r1, c1, r2, c2) {
+        if (r1 === r2) {
+          const lo = Math.min(c1, c2),
+            hi = Math.max(c1, c2);
+          for (let c = lo + 1; c < hi; c++) if (G[r1][c]) return false;
+        } else {
+          const lo = Math.min(r1, r2),
+            hi = Math.max(r1, r2);
+          for (let r = lo + 1; r < hi; r++) if (G[r][c1]) return false;
+        }
+        return true;
+      }
+      function findPath(r1, c1, r2, c2) {
+        if (r1 === r2 && c1 === c2) return null;
+        if (!G[r1][c1] || !G[r2][c2] || G[r1][c1] !== G[r2][c2]) return null;
+        if (r1 === r2 && lc(r1, c1, r1, c2))
+          return [
+            { r: r1, c: c1 },
+            { r: r2, c: c2 },
+          ];
+        if (c1 === c2 && lc(r1, c1, r2, c1))
+          return [
+            { r: r1, c: c1 },
+            { r: r2, c: c2 },
+          ];
+        if (!G[r1][c2] && lc(r1, c1, r1, c2) && lc(r1, c2, r2, c2))
+          return [
+            { r: r1, c: c1 },
+            { r: r1, c: c2 },
+            { r: r2, c: c2 },
+          ];
+        if (!G[r2][c1] && lc(r1, c1, r2, c1) && lc(r2, c1, r2, c2))
+          return [
+            { r: r1, c: c1 },
+            { r: r2, c: c1 },
+            { r: r2, c: c2 },
+          ];
+        for (let c = 0; c <= C + 1; c++) {
+          if (c === c1 || c === c2) continue;
+          if (
+            !G[r1][c] &&
+            !G[r2][c] &&
+            lc(r1, c1, r1, c) &&
+            lc(r1, c, r2, c) &&
+            lc(r2, c, r2, c2)
+          )
+            return [
+              { r: r1, c: c1 },
+              { r: r1, c: c },
+              { r: r2, c: c },
+              { r: r2, c: c2 },
+            ];
+        }
+        for (let r = 0; r <= R + 1; r++) {
+          if (r === r1 || r === r2) continue;
+          if (
+            !G[r][c1] &&
+            !G[r][c2] &&
+            lc(r1, c1, r, c1) &&
+            lc(r, c1, r, c2) &&
+            lc(r, c2, r2, c2)
+          )
+            return [
+              { r: r1, c: c1 },
+              { r: r, c: c1 },
+              { r: r, c: c2 },
+              { r: r2, c: c2 },
+            ];
+        }
+        return null;
+      }
+      function anyMove() {
+        const ps = [];
+        for (let r = 1; r <= R; r++)
+          for (let c = 1; c <= C; c++) if (G[r][c]) ps.push({ r, c });
+        for (let i = 0; i < ps.length; i++)
+          for (let j = i + 1; j < ps.length; j++) {
+            if (G[ps[i].r][ps[i].c] !== G[ps[j].r][ps[j].c]) continue;
+            if (findPath(ps[i].r, ps[i].c, ps[j].r, ps[j].c))
+              return { a: ps[i], b: ps[j] };
+          }
+        return null;
+      }
+      function rem() {
+        let n = 0;
+        for (let r = 1; r <= R; r++)
+          for (let c = 1; c <= C; c++) if (G[r][c]) n++;
+        return n;
+      }
+
+      // ── Canvas ──
+      function gp(r, c) {
+        return {
+          x: (c - 1) * (TS + TG) + TS / 2 + CP,
+          y: (r - 1) * (TS + TG) + TS / 2 + CP,
+        };
+      }
+      function initCanvas() {
+        const cv = document.getElementById("pcanvas");
+        const bw = C * (TS + TG) - TG,
+          bh = R * (TS + TG) - TG;
+        cv.width = bw + CP * 2;
+        cv.height = bh + CP * 2;
+        cv.style.left = -CP + "px";
+        cv.style.top = -CP + "px";
+        cv.style.width = bw + CP * 2 + "px";
+        cv.style.height = bh + CP * 2 + "px";
+      }
+      function drawPath(pts) {
+        const cv = document.getElementById("pcanvas"),
+          cx = cv.getContext("2d");
+        cx.clearRect(0, 0, cv.width, cv.height);
+        if (!pts || pts.length < 2) return;
+        cx.beginPath();
+        cx.strokeStyle = "rgba(255,140,0,.92)";
+        cx.lineWidth = 5;
+        cx.lineCap = "round";
+        cx.lineJoin = "round";
+        cx.setLineDash([10, 5]);
+        cx.shadowColor = "rgba(255,200,0,.75)";
+        cx.shadowBlur = 12;
+        const s = gp(pts[0].r, pts[0].c);
+        cx.moveTo(s.x, s.y);
+        for (let i = 1; i < pts.length; i++) {
+          const p = gp(pts[i].r, pts[i].c);
+          cx.lineTo(p.x, p.y);
+        }
+        cx.stroke();
+      }
+      function clrPath() {
+        const cv = document.getElementById("pcanvas");
+        cv.getContext("2d").clearRect(0, 0, cv.width, cv.height);
+      }
+
+      // ── Board ──
+      function te(r, c) {
+        return document.getElementById("t" + r + "_" + c);
+      }
+      function setImg(el, tv) {
+        el.innerHTML = "";
+        if (!tv) return;
+        const ti = tv - 1,
+          pk = PKMS[ti];
+        const img = document.createElement("img");
+        // Try regular sprite first (fast & reliable), then official artwork as backup
+        img.src = spriteUrl(pk.id);
+        img.alt = pk.n;
+        let tried = false;
+        img.onerror = function () {
+          if (!tried) {
+            tried = true;
+            // Try official artwork as backup
+            this.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pk.id}.png`;
+          } else {
+            this.remove();
+            const fb = document.createElement("div");
+            fb.className = "fb";
+            fb.textContent = EMJ[ti];
+            el.appendChild(fb);
+          }
+        };
+        el.appendChild(img);
+      }
+      function renderBoard() {
+        const bd = document.getElementById("board");
+        bd.style.gridTemplateColumns = `repeat(${C},${TS}px)`;
+        bd.style.gridTemplateRows = `repeat(${R},${TS}px)`;
+        bd.innerHTML = "";
+        for (let r = 1; r <= R; r++)
+          for (let c = 1; c <= C; c++) {
+            const d = document.createElement("div");
+            d.className = "tile";
+            d.id = "t" + r + "_" + c;
+            d.onclick = (() => {
+              const rr = r,
+                cc = c;
+              return () => onClick(rr, cc);
+            })();
+            setImg(d, G[r][c]);
+            bd.appendChild(d);
+          }
+        initCanvas();
+        scaleBoard();
+      }
+      function emptyTile(r, c) {
+        G[r][c] = 0;
+        const el = te(r, c);
+        if (el) {
+          el.classList.remove("sel", "hint", "boom", "wrong");
+          el.classList.add("empty");
+        }
+      }
+
+      // ── Header & Progress ──
+      function updHdr() {
+        document.getElementById("ptsD").textContent = pts;
+        document.getElementById("tmrD").textContent = tl;
+        document.getElementById("lvD").textContent = curLv + 1 + "/3";
+        document.getElementById("tmrStat").classList.toggle("hot", tl <= 30);
+        // dots
+        for (let i = 0; i < 3; i++) {
+          const d = document.getElementById("d" + i);
+          if (!d) continue;
+          d.classList.remove("done", "cur");
+          if (i < curLv) d.classList.add("done");
+          else if (i === curLv) d.classList.add("cur");
+        }
+      }
+
+      // ── Selection / Click ──
+      function desel() {
+        if (sel) {
+          const e = te(sel.r, sel.c);
+          if (e) e.classList.remove("sel");
+        }
+        sel = null;
+      }
+      function clrHint() {
+        if (hTO) {
+          clearTimeout(hTO);
+          hTO = null;
+        }
+        hEl.forEach((e) => {
+          if (e) e.classList.remove("hint");
+        });
+        hEl = [];
+      }
+
+      function onClick(r, c) {
+        if (busy || !G[r][c]) return;
+        sClick();
+        clrHint();
+        if (sel && sel.r === r && sel.c === c) {
+          desel();
+          return;
+        }
+        if (!sel) {
+          sel = { r, c };
+          const e = te(r, c);
+          if (e) e.classList.add("sel");
+          return;
+        }
+        const r1 = sel.r,
+          c1 = sel.c,
+          r2 = r,
+          c2 = c;
+        desel();
+        const path = findPath(r1, c1, r2, c2);
+        if (path) {
+          busy = true;
+          sMatch();
+          drawPath(path);
+          pts += 100;
+          updHdr();
+          setTimeout(() => {
+            clrPath();
+            const e1 = te(r1, c1),
+              e2 = te(r2, c2);
+            if (e1) e1.classList.add("boom");
+            if (e2) e2.classList.add("boom");
+            setTimeout(() => {
+              emptyTile(r1, c1);
+              emptyTile(r2, c2);
+              busy = false;
+              if (rem() === 0) {
+                onLevelClear();
+                return;
+              }
+              chkDlk();
+            }, 400);
+          }, 430);
+        } else {
+          sMiss();
+          const e1 = te(r1, c1),
+            e2 = te(r2, c2);
+          if (e1) e1.classList.add("wrong");
+          if (e2) e2.classList.add("wrong");
+          setTimeout(() => {
+            if (e1) e1.classList.remove("wrong");
+            if (e2) e2.classList.remove("wrong");
+          }, 450);
+        }
+      }
+
+      // ── Hint / Shuffle / Deadlock ──
+      function doHint() {
+        clrHint();
+        const m = anyMove();
+        if (!m) {
+          document.getElementById("dlkBanner").style.display = "block";
+          return;
+        }
+        const ea = te(m.a.r, m.a.c),
+          eb = te(m.b.r, m.b.c);
+        if (ea) ea.classList.add("hint");
+        if (eb) eb.classList.add("hint");
+        hEl = [ea, eb];
+        pts = Math.max(0, pts - 20);
+        updHdr();
+        hTO = setTimeout(() => clrHint(), 2600);
+      }
+      function doShuffle() {
+        const ps = [],
+          vs = [];
+        for (let r = 1; r <= R; r++)
+          for (let c = 1; c <= C; c++)
+            if (G[r][c]) {
+              ps.push({ r, c });
+              vs.push(G[r][c]);
+            }
+        if (!ps.length) return;
+        let tries = 0;
+        do {
+          shuf(vs);
+          ps.forEach((p, i) => {
+            G[p.r][p.c] = vs[i];
+          });
+          tries++;
+        } while (!anyMove() && tries < 100);
+        clrHint();
+        desel();
+        clrPath();
+        document.getElementById("dlkBanner").style.display = "none";
+        sShuffle();
+        for (let r = 1; r <= R; r++)
+          for (let c = 1; c <= C; c++) {
+            const el = te(r, c);
+            if (!el) continue;
+            if (!G[r][c]) {
+              el.classList.add("empty");
+              continue;
+            }
+            el.classList.remove("empty");
+            setImg(el, G[r][c]);
+          }
+      }
+      function chkDlk() {
+        document.getElementById("dlkBanner").style.display = anyMove()
+          ? "none"
+          : "block";
+      }
+
+      // ── Timer ──
+      function startTmr() {
+        stopTmr();
+        tmrId = setInterval(() => {
+          tl--;
+          updHdr();
+          if (tl <= 0) {
+            stopTmr();
+            doLose();
+          }
+        }, 1000);
+      }
+      function stopTmr() {
+        if (tmrId) {
+          clearInterval(tmrId);
+          tmrId = null;
+        }
+      }
+
+      // ── Level Complete ──
+      function onLevelClear() {
+        stopTmr();
+        const bonus = tl * 5;
+        pts += bonus;
+        updHdr();
+        sLvlDone();
+        const isLast = curLv === 2;
+        if (isLast) {
+          // All 3 levels done!
+          setTimeout(() => doAllWin(), 600);
+        } else {
+          document.getElementById("lvOvTitle").textContent =
+            curLv === 0 ? "🎉 Màn 1 xong!" : "🎊 Màn 2 xong!";
+          document.getElementById("lvOvPts").textContent = pts;
+          document.getElementById("lvOvBonus").textContent =
+            `+${bonus} điểm thưởng thời gian`;
+          document.getElementById("lvOvBtn").textContent =
+            "Màn " + (curLv + 2) + " →";
+          document.getElementById("lvOv").classList.add("on");
+        }
+      }
+      function nextLevel() {
+        document.getElementById("lvOv").classList.remove("on");
+        curLv++;
+        loadLevel(curLv);
+      }
+      function doAllWin() {
+        const nr = saveHS(pts);
+        document.getElementById("winPts").textContent = pts;
+        const m = document.getElementById("winMsg");
+        if (nr) {
+          m.textContent = "🏆 Kỷ lục mới! Giỏi quá!";
+          m.className = "rec";
+        } else {
+          m.textContent = "Kỷ lục: " + hs + " điểm";
+          m.className = "";
+        }
+        document.getElementById("winOv").classList.add("on");
+        sWin();
+      }
+      function doLose() {
+        document.getElementById("losePts").textContent = pts;
+        document.getElementById("loseMsg").textContent =
+          "Kỷ lục: " + hs + " điểm";
+        document.getElementById("loseOv").classList.add("on");
+      }
+
+      // ── Game Flow ──
+      function loadLevel(li) {
+        tl = LVS[li].sec;
+        sel = null;
+        busy = false;
+        hEl = [];
+        clrHint();
+        mkGrid(li);
+        document.getElementById("dlkBanner").style.display = "none";
+        renderBoard();
+        updHdr();
+        startTmr();
+      }
+      function startRun() {
+        // close all overlays
+        ["winOv", "loseOv", "lvOv"].forEach((id) =>
+          document.getElementById(id).classList.remove("on"),
+        );
+        curLv = 0;
+        pts = 0;
+        show("game");
+        loadLevel(0);
+      }
+      function goStart() {
+        stopTmr();
+        ["winOv", "loseOv", "lvOv"].forEach((id) =>
+          document.getElementById(id).classList.remove("on"),
+        );
+        show("start");
+        loadHS();
+      }
+      function confirmQuit() {
+        if (confirm("Thoát về menu? Điểm lần này sẽ mất.")) goStart();
+      }
+      function show(id) {
+        document
+          .querySelectorAll(".scr")
+          .forEach((s) => s.classList.remove("on"));
+        document.getElementById(id).classList.add("on");
+      }
+
+      // ── Responsive Scale ──
+      function scaleBoard() {
+        const w = document.getElementById("bwrap");
+        if (!w || !C) return;
+        const avail = window.innerWidth - 32;
+        const nat = C * (TS + TG) - TG + 22;
+        const sc = Math.min(1, avail / nat);
+        w.style.zoom = String(sc);
+      }
+      window.addEventListener("resize", () => {
+        if (G.length) scaleBoard();
+      });
+
+      // ── Init ──
+      loadHS();
+    </script>
+  </body>
+</html>
