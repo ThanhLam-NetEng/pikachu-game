@@ -738,9 +738,9 @@
    PIKACHU GAME — Sequential Levels Edition
 ══════════════════════════════════════════ */
 
-      const TS = 72,
-        TG = 4,
-        CP = TS + TG;
+      let TS = 72,
+        TG = 4;
+      const getCP = () => TS + TG;
       const E = {
         board: document.getElementById("board"),
         bwrap: document.getElementById("bwrap"),
@@ -1088,21 +1088,23 @@
 
       // ── Canvas ──
       function gp(r, c) {
+        const cp = getCP();
         return {
-          x: (c - 1) * (TS + TG) + TS / 2 + CP,
-          y: (r - 1) * (TS + TG) + TS / 2 + CP,
+          x: (c - 1) * (TS + TG) + TS / 2 + cp,
+          y: (r - 1) * (TS + TG) + TS / 2 + cp,
         };
       }
       function initCanvas() {
         const cv = E.pcanvas;
+        const cp = getCP();
         const bw = C * (TS + TG) - TG,
           bh = R * (TS + TG) - TG;
-        cv.width = bw + CP * 2;
-        cv.height = bh + CP * 2;
-        cv.style.left = -CP + "px";
-        cv.style.top = -CP + "px";
-        cv.style.width = bw + CP * 2 + "px";
-        cv.style.height = bh + CP * 2 + "px";
+        cv.width = bw + cp * 2;
+        cv.height = bh + cp * 2;
+        cv.style.left = -cp + "px";
+        cv.style.top = -cp + "px";
+        cv.style.width = bw + cp * 2 + "px";
+        cv.style.height = bh + cp * 2 + "px";
       }
       function drawPath(pts) {
         const cv = E.pcanvas,
@@ -1159,11 +1161,32 @@
         };
         el.appendChild(img);
       }
+      function adjustTileSize() {
+        if (!R || !C) return false;
+        const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        const usedH =
+          (E.hdr?.getBoundingClientRect().height || 0) +
+          (E.ctrl?.getBoundingClientRect().height || 0) +
+          112;
+        const availW = Math.max(0, vw - 24);
+        const availH = Math.max(0, vh - usedH);
+        const maxWidthTs = Math.floor((availW - 22 + TG) / C - TG);
+        const maxHeightTs = Math.floor((availH - 22 + TG) / R - TG);
+        const nextTS = Math.max(40, Math.min(72, maxWidthTs, maxHeightTs));
+        if (nextTS !== TS) {
+          TS = nextTS;
+          return true;
+        }
+        return false;
+      }
       function renderBoard() {
+        adjustTileSize();
         const bd = E.board;
         T = Array.from({ length: R + 2 }, () => Array(C + 2).fill(null));
         bd.style.gridTemplateColumns = `repeat(${C},${TS}px)`;
         bd.style.gridTemplateRows = `repeat(${R},${TS}px)`;
+        bd.style.gap = TG + "px";
         bd.innerHTML = "";
         for (let r = 1; r <= R; r++)
           for (let c = 1; c <= C; c++) {
@@ -1172,10 +1195,16 @@
             d.id = "t" + r + "_" + c;
             d.dataset.r = r;
             d.dataset.c = c;
+            d.style.width = TS + "px";
+            d.style.height = TS + "px";
             setImg(d, G[r][c]);
             bd.appendChild(d);
             T[r][c] = d;
           }
+        if (sel) {
+          const selected = te(sel.r, sel.c);
+          if (selected) selected.classList.add("sel");
+        }
         initCanvas();
         scaleBoard();
       }
@@ -1497,10 +1526,14 @@
               : "none";
       }
       window.addEventListener("resize", () => {
-        if (G.length) scaleBoard();
+        if (!G.length) return;
+        if (adjustTileSize()) renderBoard();
+        else scaleBoard();
       });
       window.addEventListener("orientationchange", () => {
-        if (G.length) scaleBoard();
+        if (!G.length) return;
+        if (adjustTileSize()) renderBoard();
+        else scaleBoard();
       });
 
       // ── Init ──
