@@ -222,6 +222,48 @@
       }
       .stat.tmr .s-val {
         color: var(--or);
+        font-size: 14px;
+        letter-spacing: 0.5px;
+      }
+      .stat.tmr .timer-bar {
+        width: 100%;
+        height: 9px;
+        background: #f8ebc9;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+      .stat.tmr .timer-fill {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #ffd05b, #ff8c00);
+        transition: width 0.24s ease;
+      }
+      .timer-hint {
+        margin: 10px auto 0;
+        padding: 10px 14px;
+        max-width: 760px;
+        color: #5f430d;
+        background: #fff8e5;
+        border: 1px solid #ffe2a5;
+        border-radius: 14px;
+        text-align: center;
+        font-size: 14px;
+        display: none;
+      }
+      .timer-hint span {
+        display: inline-block;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
       }
       .stat.tmr.hot {
         background: #fff0f0;
@@ -463,7 +505,7 @@
         .start-btn,
         .btn {
           font-size: 18px;
-          padding: 14px 24px;
+          padding: 14px 20px;
         }
         .howto {
           padding: 16px 18px;
@@ -473,6 +515,14 @@
         }
         .stat {
           min-width: 72px;
+        }
+        .bwrap {
+          padding: 8px;
+          border-width: 2px;
+        }
+        .timer-hint {
+          font-size: 13px;
+          padding: 10px 12px;
         }
       }
 
@@ -572,7 +622,7 @@
         <p>
           👆 <b>Chạm 2 ô có cùng hình Pokémon</b> để nối<br />
           🔗 Đường nối <b>không quá 2 lần rẽ góc</b><br />
-          🏅 5 màn tăng dần — nối hết là qua màn<br />
+          🏅 8 màn tăng dần — nối hết là qua màn<br />
           💡 <b>Gợi ý</b> (trừ 20đ) • 🔀 <b>Xáo bài</b> khi bí
         </p>
       </div>
@@ -583,11 +633,17 @@
       <div class="hdr">
         <div class="stat">
           <div class="s-lbl">Màn</div>
-          <div class="s-val" id="lvD">1/5</div>
+          <div class="s-val" id="lvD">1/8</div>
         </div>
         <div class="stat tmr" id="tmrStat">
-          <div class="s-lbl">⏱ Giờ còn</div>
-          <div class="s-val" id="tmrD">180</div>
+          <div class="s-lbl">⏱ Thời gian</div>
+          <div class="s-val">
+            <span id="tmrD" class="sr-only">180</span>
+            <span>Đang chạy</span>
+          </div>
+          <div class="timer-bar">
+            <div class="timer-fill" id="tmrBar"></div>
+          </div>
         </div>
         <div class="stat">
           <div class="s-lbl">Điểm</div>
@@ -611,11 +667,17 @@
         <div class="board" id="board"></div>
         <canvas id="pcanvas"></canvas>
       </div>
+      <div class="timer-hint" id="rotateHint">
+        📱 Nếu không thấy toàn cảnh, xoay ngang điện thoại để chơi dễ hơn.
+      </div>
       <div class="ctrl">
         <button class="btn b-bl" onclick="doHint()">💡 Gợi ý</button>
         <button class="btn b-gy" onclick="doShuffle()">🔀 Xáo bài</button>
         <button class="btn b-gr" id="soundBtn" onclick="toggleSound()">
           🔊 Âm thanh: Bật
+        </button>
+        <button class="btn b-gy" id="themeBtn" onclick="toggleTheme()">
+          🌙 Ban đêm
         </button>
         <button class="btn b-gy" id="themeBtn" onclick="toggleTheme()">
           🌙 Ban đêm
@@ -643,7 +705,7 @@
     <div class="ov" id="winOv">
       <div class="popup">
         <h2>🏆 Quá giỏi!</h2>
-        <p>Tổng điểm 5 màn:</p>
+        <p>Tổng điểm toàn bộ màn:</p>
         <div class="pts" id="winPts">0</div>
         <p id="winMsg"></p>
         <div class="btns">
@@ -675,6 +737,38 @@
       const TS = 72,
         TG = 4,
         CP = TS + TG;
+      const E = {
+        board: document.getElementById("board"),
+        bwrap: document.getElementById("bwrap"),
+        pcanvas: document.getElementById("pcanvas"),
+        dlkBanner: document.getElementById("dlkBanner"),
+        ptsD: document.getElementById("ptsD"),
+        tmrD: document.getElementById("tmrD"),
+        lvD: document.getElementById("lvD"),
+        tmrStat: document.getElementById("tmrStat"),
+        mainHs: document.getElementById("mainHs"),
+        lvOv: document.getElementById("lvOv"),
+        lvOvTitle: document.getElementById("lvOvTitle"),
+        lvOvPts: document.getElementById("lvOvPts"),
+        lvOvBonus: document.getElementById("lvOvBonus"),
+        lvOvBtn: document.getElementById("lvOvBtn"),
+        winOv: document.getElementById("winOv"),
+        winPts: document.getElementById("winPts"),
+        winMsg: document.getElementById("winMsg"),
+        loseOv: document.getElementById("loseOv"),
+        losePts: document.getElementById("losePts"),
+        loseMsg: document.getElementById("loseMsg"),
+        lvProg: document.getElementById("lvProg"),
+        tmrBar: document.getElementById("tmrBar"),
+        rotateHint: document.getElementById("rotateHint"),
+        soundBtn: document.getElementById("soundBtn"),
+        themeBtn: document.getElementById("themeBtn"),
+        start: document.getElementById("start"),
+        game: document.getElementById("game"),
+        hdr: document.querySelector(".hdr"),
+        ctrl: document.querySelector(".ctrl"),
+        scr: document.querySelectorAll(".scr"),
+      };
 
       // 20 Pokémon — regular sprites (96×96, loads fast & reliably)
       const PKMS = [
@@ -729,10 +823,13 @@
       // sequential levels: more relaxed time
       const LVS = [
         { R: 6, C: 8, T: 12, sec: 180, name: "Màn 1" }, // 3 phút
-        { R: 8, C: 8, T: 16, sec: 240, name: "Màn 2" }, // 4 phút
-        { R: 8, C: 10, T: 20, sec: 300, name: "Màn 3" }, // 5 phút
-        { R: 8, C: 10, T: 20, sec: 360, name: "Màn 4" }, // 6 phút
-        { R: 10, C: 10, T: 20, sec: 420, name: "Màn 5" }, // 7 phút
+        { R: 6, C: 10, T: 14, sec: 210, name: "Màn 2" }, // 3m30
+        { R: 8, C: 8, T: 16, sec: 240, name: "Màn 3" }, // 4 phút
+        { R: 8, C: 10, T: 18, sec: 300, name: "Màn 4" }, // 5 phút
+        { R: 9, C: 10, T: 20, sec: 360, name: "Màn 5" }, // 6 phút
+        { R: 10, C: 10, T: 20, sec: 420, name: "Màn 6" }, // 7 phút
+        { R: 10, C: 12, T: 24, sec: 480, name: "Màn 7" }, // 8 phút
+        { R: 11, C: 12, T: 24, sec: 540, name: "Màn 8" }, // 9 phút
       ];
       const LV_COUNT = LVS.length;
       let soundOn = true;
@@ -742,6 +839,7 @@
       let G = [],
         R = 0,
         C = 0;
+      let T = [];
       let sel = null,
         pts = 0,
         tl = 0;
@@ -817,14 +915,15 @@
         } catch (e) {}
       }
       function updateSoundButton() {
-        const btn = document.getElementById("soundBtn");
-        if (btn)
-          btn.textContent = soundOn ? "🔊 Âm thanh: Bật" : "🔇 Âm thanh: Tắt";
+        if (E.soundBtn)
+          E.soundBtn.textContent = soundOn
+            ? "🔊 Âm thanh: Bật"
+            : "🔇 Âm thanh: Tắt";
       }
       function applyTheme() {
         document.body.classList.toggle("dark-theme", darkMode);
-        const btn = document.getElementById("themeBtn");
-        if (btn) btn.textContent = darkMode ? "☀️ Sáng" : "🌙 Ban đêm";
+        if (E.themeBtn)
+          E.themeBtn.textContent = darkMode ? "☀️ Sáng" : "🌙 Ban đêm";
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.content = darkMode ? "#111218" : "#ff8c00";
       }
@@ -844,7 +943,7 @@
         try {
           hs = parseInt(localStorage.getItem("pika3_hs") || "0") || 0;
         } catch (e) {}
-        document.getElementById("mainHs").textContent = hs;
+        E.mainHs.textContent = hs;
       }
       function saveHS(sc) {
         if (sc > hs) {
@@ -852,7 +951,7 @@
           try {
             localStorage.setItem("pika3_hs", String(hs));
           } catch (e) {}
-          document.getElementById("mainHs").textContent = hs;
+          E.mainHs.textContent = hs;
           return true;
         }
         return false;
@@ -958,15 +1057,22 @@
         return null;
       }
       function anyMove() {
-        const ps = [];
+        const buckets = new Map();
         for (let r = 1; r <= R; r++)
-          for (let c = 1; c <= C; c++) if (G[r][c]) ps.push({ r, c });
-        for (let i = 0; i < ps.length; i++)
-          for (let j = i + 1; j < ps.length; j++) {
-            if (G[ps[i].r][ps[i].c] !== G[ps[j].r][ps[j].c]) continue;
-            if (findPath(ps[i].r, ps[i].c, ps[j].r, ps[j].c))
-              return { a: ps[i], b: ps[j] };
+          for (let c = 1; c <= C; c++) {
+            const v = G[r][c];
+            if (!v) continue;
+            if (!buckets.has(v)) buckets.set(v, []);
+            buckets.get(v).push({ r, c });
           }
+        for (const ps of buckets.values()) {
+          for (let i = 0; i < ps.length; i++)
+            for (let j = i + 1; j < ps.length; j++) {
+              const a = ps[i],
+                b = ps[j];
+              if (findPath(a.r, a.c, b.r, b.c)) return { a, b };
+            }
+        }
         return null;
       }
       function rem() {
@@ -984,7 +1090,7 @@
         };
       }
       function initCanvas() {
-        const cv = document.getElementById("pcanvas");
+        const cv = E.pcanvas;
         const bw = C * (TS + TG) - TG,
           bh = R * (TS + TG) - TG;
         cv.width = bw + CP * 2;
@@ -995,7 +1101,7 @@
         cv.style.height = bh + CP * 2 + "px";
       }
       function drawPath(pts) {
-        const cv = document.getElementById("pcanvas"),
+        const cv = E.pcanvas,
           cx = cv.getContext("2d");
         cx.clearRect(0, 0, cv.width, cv.height);
         if (!pts || pts.length < 2) return;
@@ -1016,13 +1122,13 @@
         cx.stroke();
       }
       function clrPath() {
-        const cv = document.getElementById("pcanvas");
+        const cv = E.pcanvas;
         cv.getContext("2d").clearRect(0, 0, cv.width, cv.height);
       }
 
       // ── Board ──
       function te(r, c) {
-        return document.getElementById("t" + r + "_" + c);
+        return T[r] ? T[r][c] : null;
       }
       function setImg(el, tv) {
         el.innerHTML = "";
@@ -1050,7 +1156,8 @@
         el.appendChild(img);
       }
       function renderBoard() {
-        const bd = document.getElementById("board");
+        const bd = E.board;
+        T = Array.from({ length: R + 2 }, () => Array(C + 2).fill(null));
         bd.style.gridTemplateColumns = `repeat(${C},${TS}px)`;
         bd.style.gridTemplateRows = `repeat(${R},${TS}px)`;
         bd.innerHTML = "";
@@ -1059,14 +1166,11 @@
             const d = document.createElement("div");
             d.className = "tile";
             d.id = "t" + r + "_" + c;
-            const rr = r,
-              cc = c;
-            d.addEventListener("pointerdown", (e) => {
-              e.preventDefault();
-              onClick(rr, cc);
-            });
+            d.dataset.r = r;
+            d.dataset.c = c;
             setImg(d, G[r][c]);
             bd.appendChild(d);
+            T[r][c] = d;
           }
         initCanvas();
         scaleBoard();
@@ -1082,18 +1186,21 @@
 
       // ── Header & Progress ──
       function updHdr() {
-        document.getElementById("ptsD").textContent = pts;
-        document.getElementById("tmrD").textContent = tl;
-        document.getElementById("lvD").textContent = curLv + 1 + "/" + LV_COUNT;
-        document.getElementById("tmrStat").classList.toggle("hot", tl <= 30);
-        const dots = document.querySelectorAll("#lvProg .lv-dot");
+        E.ptsD.textContent = pts;
+        E.tmrD.textContent = tl;
+        E.lvD.textContent = curLv + 1 + "/" + LV_COUNT;
+        E.tmrStat.classList.toggle("hot", tl <= 30);
+        const max = LVS[curLv].sec;
+        const percent = Math.max(0, Math.min(100, (tl / max) * 100));
+        if (E.tmrBar) E.tmrBar.style.width = percent + "%";
+        const dots = E.lvProg.querySelectorAll(".lv-dot");
         dots.forEach((d, i) => {
           d.classList.toggle("done", i < curLv);
           d.classList.toggle("cur", i === curLv);
         });
       }
       function renderLevelDots() {
-        const prog = document.getElementById("lvProg");
+        const prog = E.lvProg;
         prog.innerHTML = "";
         for (let i = 0; i < LV_COUNT; i++) {
           const dot = document.createElement("div");
@@ -1182,7 +1289,7 @@
         clrHint();
         const m = anyMove();
         if (!m) {
-          document.getElementById("dlkBanner").style.display = "block";
+          E.dlkBanner.style.display = "block";
           return;
         }
         const ea = te(m.a.r, m.a.c),
@@ -1228,9 +1335,7 @@
         clrHint();
         desel();
         clrPath();
-        document.getElementById("dlkBanner").style.display = hasMove
-          ? "none"
-          : "block";
+        E.dlkBanner.style.display = hasMove ? "none" : "block";
         sShuffle();
         for (let r = 1; r <= R; r++)
           for (let c = 1; c <= C; c++) {
@@ -1245,9 +1350,7 @@
           }
       }
       function chkDlk() {
-        document.getElementById("dlkBanner").style.display = anyMove()
-          ? "none"
-          : "block";
+        E.dlkBanner.style.display = anyMove() ? "none" : "block";
       }
 
       // ── Timer ──
@@ -1281,25 +1384,22 @@
           // All levels done!
           setTimeout(() => doAllWin(), 600);
         } else {
-          document.getElementById("lvOvTitle").textContent =
-            LVS[curLv].name + " xong!";
-          document.getElementById("lvOvPts").textContent = pts;
-          document.getElementById("lvOvBonus").textContent =
-            `+${bonus} điểm thưởng thời gian`;
-          document.getElementById("lvOvBtn").textContent =
-            LVS[curLv + 1].name + " →";
-          document.getElementById("lvOv").classList.add("on");
+          E.lvOvTitle.textContent = LVS[curLv].name + " xong!";
+          E.lvOvPts.textContent = pts;
+          E.lvOvBonus.textContent = `+${bonus} điểm thưởng thời gian`;
+          E.lvOvBtn.textContent = LVS[curLv + 1].name + " →";
+          E.lvOv.classList.add("on");
         }
       }
       function nextLevel() {
-        document.getElementById("lvOv").classList.remove("on");
+        E.lvOv.classList.remove("on");
         curLv++;
         loadLevel(curLv);
       }
       function doAllWin() {
         const nr = saveHS(pts);
-        document.getElementById("winPts").textContent = pts;
-        const m = document.getElementById("winMsg");
+        E.winPts.textContent = pts;
+        const m = E.winMsg;
         if (nr) {
           m.textContent = "🏆 Kỷ lục mới! Giỏi quá!";
           m.className = "rec";
@@ -1307,14 +1407,13 @@
           m.textContent = "Kỷ lục: " + hs + " điểm";
           m.className = "";
         }
-        document.getElementById("winOv").classList.add("on");
+        E.winOv.classList.add("on");
         sWin();
       }
       function doLose() {
-        document.getElementById("losePts").textContent = pts;
-        document.getElementById("loseMsg").textContent =
-          "Kỷ lục: " + hs + " điểm";
-        document.getElementById("loseOv").classList.add("on");
+        E.losePts.textContent = pts;
+        E.loseMsg.textContent = "Kỷ lục: " + hs + " điểm";
+        E.loseOv.classList.add("on");
       }
 
       // ── Game Flow ──
@@ -1325,15 +1424,14 @@
         hEl = [];
         clrHint();
         mkGrid(li);
-        document.getElementById("dlkBanner").style.display = "none";
+        E.dlkBanner.style.display = "none";
         renderBoard();
         updHdr();
         startTmr();
       }
       function startRun() {
-        // close all overlays
-        ["winOv", "loseOv", "lvOv"].forEach((id) =>
-          document.getElementById(id).classList.remove("on"),
+        [E.winOv, E.loseOv, E.lvOv].forEach(
+          (ov) => ov && ov.classList.remove("on"),
         );
         curLv = 0;
         pts = 0;
@@ -1342,8 +1440,8 @@
       }
       function goStart() {
         stopTmr();
-        ["winOv", "loseOv", "lvOv"].forEach((id) =>
-          document.getElementById(id).classList.remove("on"),
+        [E.winOv, E.loseOv, E.lvOv].forEach(
+          (ov) => ov && ov.classList.remove("on"),
         );
         show("start");
         loadHS();
@@ -1352,27 +1450,48 @@
         if (confirm("Thoát về menu? Điểm lần này sẽ mất.")) goStart();
       }
       function show(id) {
-        document
-          .querySelectorAll(".scr")
-          .forEach((s) => s.classList.remove("on"));
-        document.getElementById(id).classList.add("on");
+        E.scr.forEach((s) => s.classList.remove("on"));
+        const target = E[id];
+        if (target) target.classList.add("on");
+      }
+
+      // ── Board events ──
+      function boardPointerDown(e) {
+        const tile = e.target.closest(".tile");
+        if (!tile || !E.board.contains(tile) || busy) return;
+        const r = parseInt(tile.dataset.r, 10);
+        const c = parseInt(tile.dataset.c, 10);
+        if (!r || !c) return;
+        onClick(r, c);
       }
 
       // ── Responsive Scale ──
       function scaleBoard() {
-        const w = document.getElementById("bwrap");
-        if (!w || !C) return;
-        const avail = window.innerWidth - 32;
-        const nat = C * (TS + TG) - TG + 22;
-        const sc = Math.min(1, avail / nat);
-        w.style.zoom = "";
+        const w = E.bwrap;
+        if (!w || !C || !E.hdr || !E.ctrl) return;
+        const natW = C * (TS + TG) - TG + 22;
+        const natH = R * (TS + TG) - TG + 22;
+        const usedH = E.hdr.offsetHeight + E.ctrl.offsetHeight + 120;
+        const availW = window.innerWidth - 24;
+        const availH = window.innerHeight - usedH;
+        const sc = Math.min(1, availW / natW, availH / natH);
         w.style.transform = sc < 1 ? `scale(${sc})` : "";
+        w.style.transformOrigin = "top center";
+        if (E.rotateHint)
+          E.rotateHint.style.display =
+            window.innerHeight > window.innerWidth && sc < 0.76
+              ? "block"
+              : "none";
       }
       window.addEventListener("resize", () => {
         if (G.length) scaleBoard();
       });
+      window.addEventListener("orientationchange", () => {
+        if (G.length) scaleBoard();
+      });
 
       // ── Init ──
+      if (E.board) E.board.addEventListener("pointerdown", boardPointerDown);
       renderLevelDots();
       loadSettings();
       loadHS();
