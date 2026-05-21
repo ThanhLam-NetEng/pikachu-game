@@ -146,6 +146,44 @@
         color: #5c4400;
       }
 
+      .dark-theme {
+        background: #111218;
+        color: #f8f8ff;
+      }
+      .dark-theme .bwrap {
+        background: #151821;
+        border-color: #4d5769;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+      }
+      .dark-theme .board {
+        filter: brightness(0.95);
+      }
+      .dark-theme .tile {
+        background: #1f2533;
+        border-color: #404a62;
+      }
+      .dark-theme .tile:hover:not(.empty) {
+        border-color: #7f9cff;
+      }
+      .dark-theme .stat {
+        background: #1a2030;
+        border-color: #404a62;
+        color: #f1f5ff;
+      }
+      .dark-theme .ov {
+        background: rgba(0, 0, 0, 0.75);
+      }
+      .dark-theme .popup {
+        background: #121623;
+        border-color: #40526f;
+        color: #f7f8ff;
+      }
+      .dark-theme .btn.b-gy {
+        background: #2b334f;
+        color: #f7f8ff;
+        border-color: #40526f;
+      }
+
       /* ── GAME ── */
       #game {
         padding: 10px 14px;
@@ -531,9 +569,9 @@
       <div class="howto">
         <h3>📖 Cách chơi</h3>
         <p>
-          👆 <b>Click 2 ô có cùng hình Pokémon</b> để nối<br />
+          👆 <b>Chạm 2 ô có cùng hình Pokémon</b> để nối<br />
           🔗 Đường nối <b>không quá 2 lần rẽ góc</b><br />
-          🏅 3 màn tăng dần — nối hết là qua màn<br />
+          🏅 5 màn tăng dần — nối hết là qua màn<br />
           💡 <b>Gợi ý</b> (trừ 20đ) • 🔀 <b>Xáo bài</b> khi bí
         </p>
       </div>
@@ -573,6 +611,8 @@
       <div class="ctrl">
         <button class="btn b-bl" onclick="doHint()">💡 Gợi ý</button>
         <button class="btn b-gy" onclick="doShuffle()">🔀 Xáo bài</button>
+        <button class="btn b-gr" id="soundBtn" onclick="toggleSound()">🔊 Âm thanh: Bật</button>
+        <button class="btn b-gy" id="themeBtn" onclick="toggleTheme()">🌙 Ban đêm</button>
         <button class="btn b-rd" onclick="confirmQuit()">🏠 Thoát</button>
       </div>
     </div>
@@ -596,7 +636,7 @@
     <div class="ov" id="winOv">
       <div class="popup">
         <h2>🏆 Quá giỏi!</h2>
-        <p>Tổng điểm 3 màn:</p>
+        <p>Tổng điểm 5 màn:</p>
         <div class="pts" id="winPts">0</div>
         <p id="winMsg"></p>
         <div class="btns">
@@ -688,6 +728,8 @@
         { R: 10, C: 10, T: 20, sec: 420, name: "Màn 5" }, // 7 phút
       ];
       const LV_COUNT = LVS.length;
+      let soundOn = true;
+      let darkMode = false;
 
       // ── State ──
       let G = [],
@@ -708,6 +750,7 @@
       const ga = () =>
         AC || (AC = new (window.AudioContext || window.webkitAudioContext)());
       function tn(fr, wh, dr, vol = 0.25, tp = "sine") {
+        if (!soundOn) return;
         try {
           const a = ga(),
             o = a.createOscillator(),
@@ -745,6 +788,46 @@
       const sShuffle = () =>
         [220, 262, 330, 392].forEach((f, i) => tn(f, i * 0.07, 0.1, 0.12));
       const sClick = () => tn(440, 0, 0.05, 0.07);
+
+      function loadSettings() {
+        try {
+          const json = localStorage.getItem("pika3_settings");
+          if (json) {
+            const cfg = JSON.parse(json);
+            soundOn = cfg.soundOn !== false;
+            darkMode = cfg.darkMode === true;
+          }
+        } catch (e) {}
+        updateSoundButton();
+        applyTheme();
+      }
+      function saveSettings() {
+        try {
+          localStorage.setItem(
+            "pika3_settings",
+            JSON.stringify({ soundOn, darkMode }),
+          );
+        } catch (e) {}
+      }
+      function updateSoundButton() {
+        const btn = document.getElementById("soundBtn");
+        if (btn) btn.textContent = soundOn ? "🔊 Âm thanh: Bật" : "🔇 Âm thanh: Tắt";
+      }
+      function applyTheme() {
+        document.body.classList.toggle("dark-theme", darkMode);
+        const btn = document.getElementById("themeBtn");
+        if (btn) btn.textContent = darkMode ? "☀️ Sáng" : "🌙 Ban đêm";
+      }
+      function toggleSound() {
+        soundOn = !soundOn;
+        updateSoundButton();
+        saveSettings();
+      }
+      function toggleTheme() {
+        darkMode = !darkMode;
+        applyTheme();
+        saveSettings();
+      }
 
       // ── High Score ──
       function loadHS() {
@@ -1281,6 +1364,7 @@
 
       // ── Init ──
       renderLevelDots();
+      loadSettings();
       loadHS();
     </script>
   </body>
