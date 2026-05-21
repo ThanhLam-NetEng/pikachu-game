@@ -305,8 +305,10 @@
         padding: 10px;
         box-shadow: 0 4px 24px var(--sh);
         overflow: visible;
-        transform-origin: top left;
+        transform-origin: top center;
         will-change: transform;
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 180px);
       }
       .board {
         display: grid;
@@ -519,6 +521,8 @@
         .bwrap {
           padding: 8px;
           border-width: 2px;
+          max-width: calc(100vw - 16px);
+          max-height: calc(100vh - 150px);
         }
         .timer-hint {
           font-size: 13px;
@@ -1471,15 +1475,24 @@
         if (!w || !C || !E.hdr || !E.ctrl) return;
         const natW = C * (TS + TG) - TG + 22;
         const natH = R * (TS + TG) - TG + 22;
-        const usedH = E.hdr.offsetHeight + E.ctrl.offsetHeight + 120;
-        const availW = window.innerWidth - 24;
-        const availH = window.innerHeight - usedH;
+        const viewportW = window.visualViewport
+          ? window.visualViewport.width
+          : window.innerWidth;
+        const viewportH = window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight;
+        const usedH =
+          E.hdr.getBoundingClientRect().height +
+          E.ctrl.getBoundingClientRect().height +
+          112;
+        const availW = Math.max(1, viewportW - 24);
+        const availH = Math.max(1, viewportH - usedH);
         const sc = Math.min(1, availW / natW, availH / natH);
-        w.style.transform = sc < 1 ? `scale(${sc})` : "";
+        w.style.transform = sc < 0.995 ? `scale(${sc})` : "";
         w.style.transformOrigin = "top center";
         if (E.rotateHint)
           E.rotateHint.style.display =
-            window.innerHeight > window.innerWidth && sc < 0.76
+            window.innerHeight > window.innerWidth && sc < 0.8
               ? "block"
               : "none";
       }
